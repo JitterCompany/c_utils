@@ -32,6 +32,7 @@ set(TEST_TESTS_SOURCE_DIR    "${CMAKE_CURRENT_SOURCE_DIR}")
 # the sources specified by test_<testname>_src are linked in.
 # Note: these are relative to TEST_NORMAL_SOURCE_DIR.
 set(test_align_src align.c)
+set(test_f2strn_src f2strn.c)
 
 
 # all 'shared' c files: these are linked against every test.
