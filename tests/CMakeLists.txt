@@ -13,6 +13,18 @@ include(${CMAKE_SOURCE_DIR}/CPM_setup.cmake)
 # optimize level
 set(OPT 0)
 
+# system libraries to link, separated by ';'
+set(SYSTEM_LIBRARIES m c)
+
+# linux needs libbsd
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    message(STATUS "Linux detected: linking to libbsd")
+    list(APPEND SYSTEM_LIBRARIES bsd)
+    set(L_FLAGS "-fmessage-length=80 -Wl,--gc-sections")
+else()
+    set(L_FLAGS "-fmessage-length=80 -Wl,-dead_strip")
+endif()
+
 # compile flags
 set(C_FLAGS_WARN "-Wall -Wextra -Wno-unused-parameter                   \
     -Wshadow -Wpointer-arith -Winit-self -Wstrict-overflow=5")
@@ -21,6 +33,8 @@ set(C_FLAGS "${C_FLAGS_WARN} -O${OPT} -g3 -c -fmessage-length=80        \
     -fno-builtin -ffunction-sections -fdata-sections -std=gnu99")
 
 add_definitions("${C_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${L_FLAGS}")
+set(CPM_LIBRARIES "${SYSTEM_LIBRARIES}${CPM_LIBRARIES}")
 
 # dir where the normal project sources can be found
 set(TEST_NORMAL_SOURCE_DIR   "${PROJECT_SOURCE_DIR}/")
@@ -33,6 +47,7 @@ set(TEST_TESTS_SOURCE_DIR    "${CMAKE_CURRENT_SOURCE_DIR}")
 # Note: these are relative to TEST_NORMAL_SOURCE_DIR.
 set(test_align_src align.c)
 set(test_f2strn_src f2strn.c)
+set(test_str_src str.c)
 
 
 # all 'shared' c files: these are linked against every test.
