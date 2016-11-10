@@ -27,7 +27,8 @@ endif()
 
 # compile flags
 set(C_FLAGS_WARN "-Wall -Wextra -Wno-unused-parameter                   \
-    -Wshadow -Wpointer-arith -Winit-self -Wstrict-overflow=5")
+    -Wshadow -Wpointer-arith -Winit-self -Wstrict-overflow=5            \
+    -Werror=implicit-function-declaration")
 
 set(C_FLAGS "${C_FLAGS_WARN} -O${OPT} -g3 -c -fmessage-length=80        \
     -fno-builtin -ffunction-sections -fdata-sections -std=gnu99")
