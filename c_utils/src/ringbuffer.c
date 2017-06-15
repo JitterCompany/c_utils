@@ -163,13 +163,20 @@ uint32_t ringbuffer_free_count(Ringbuffer *ringbuffer)
 
 uint32_t ringbuffer_used_count(Ringbuffer *ringbuffer)
 {
+    // check for empty first to avoid race conflict:
+    // queue may become non-empty at any time if another thread/context
+    // performs a write.
+    if(ringbuffer_is_empty(ringbuffer)) {
+        return 0;
+    }
+
     uint32_t maxDiff = ringbuffer->last_elem - ringbuffer->first_elem;
     uint32_t diff = ringbuffer->write - ringbuffer->read;
-
-    diff = (diff <= maxDiff && (diff || ringbuffer_is_empty(ringbuffer)))
-           ? diff
-           : (diff + (maxDiff + ringbuffer->elem_sz));
-
-    return diff / ringbuffer->elem_sz;
+    if(diff && (diff <= maxDiff)) {
+        return (diff / ringbuffer->elem_sz);
+    }
+    // write pointer <= read pointer: compensate for wraparound
+    diff+= (maxDiff + ringbuffer->elem_sz);
+    return (diff / ringbuffer->elem_sz);
 }
 
