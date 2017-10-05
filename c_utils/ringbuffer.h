@@ -33,8 +33,8 @@ typedef struct {
     uint8_t *volatile write;            // current write pointer
     uint32_t elem_sz;                   // element size: read/write pointers
                                             // advance in steps of this size
-    volatile uint8_t readWrap;          // toggles when the read ptr wraps
-    volatile uint8_t writeWrap;         // toggles when the write ptr wraps
+    volatile uint8_t read_wrap;         // toggles when the read ptr wraps
+    volatile uint8_t write_wrap;        // toggles when the write ptr wraps
     volatile bool overflow;             // last write attempt failed
     volatile uint16_t initialize_status;// is the ringbuffer is initialized?
 } Ringbuffer;

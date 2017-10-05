@@ -22,8 +22,8 @@ void ringbuffer_clear(Ringbuffer *ringbuffer)
 {
     ringbuffer->read = ringbuffer->first_elem;
     ringbuffer->write = ringbuffer->first_elem;
-    ringbuffer->readWrap = 0;
-    ringbuffer->writeWrap = 0;
+    ringbuffer->read_wrap = 0;
+    ringbuffer->write_wrap = 0;
     ringbuffer->overflow = false;
 }
 
@@ -34,7 +34,7 @@ bool ringbuffer_advance(Ringbuffer *ringbuffer)
             ringbuffer->read+= ringbuffer->elem_sz;
         } else {
             ringbuffer->read = ringbuffer->first_elem;
-            ringbuffer->readWrap^=1;
+            ringbuffer->read_wrap^=1;
         }
         return true;
     }
@@ -102,7 +102,7 @@ bool ringbuffer_commit(Ringbuffer *ringbuffer)
             ringbuffer->write+= ringbuffer->elem_sz;
         } else {
             ringbuffer->write = ringbuffer->first_elem;
-            ringbuffer->writeWrap^=1;
+            ringbuffer->write_wrap^=1;
         }
         return true;
     }
@@ -139,13 +139,13 @@ void *ringbuffer_get_readable_offset(Ringbuffer *ringbuffer, uint32_t offset)
 inline bool ringbuffer_is_empty(Ringbuffer *ringbuffer)
 {
     return (ringbuffer->read == ringbuffer->write
-            && ringbuffer->readWrap == ringbuffer->writeWrap);
+            && ringbuffer->read_wrap == ringbuffer->write_wrap);
 }
 
 inline bool ringbuffer_is_full(Ringbuffer *ringbuffer)
 {
     return (ringbuffer->read == ringbuffer->write
-            && ringbuffer->readWrap != ringbuffer->writeWrap);
+            && ringbuffer->read_wrap != ringbuffer->write_wrap);
 }
 
 inline bool ringbuffer_is_overflowed(Ringbuffer *ringbuffer)
