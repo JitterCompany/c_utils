@@ -155,8 +155,8 @@ inline bool ringbuffer_is_overflowed(Ringbuffer *ringbuffer)
 
 uint32_t ringbuffer_free_count(Ringbuffer *ringbuffer)
 {
-    uint32_t max_free = (ringbuffer->last_elem - ringbuffer->first_elem)
-                        / ringbuffer->elem_sz;
+    uint32_t max_free = 1 + ((ringbuffer->last_elem - ringbuffer->first_elem)
+                        / ringbuffer->elem_sz);
 
     return (max_free - ringbuffer_used_count(ringbuffer));
 }
