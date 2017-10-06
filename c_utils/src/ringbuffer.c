@@ -1,12 +1,13 @@
 #include "ringbuffer.h"
+#include "assert.h"
 #include "string.h"
 
 void ringbuffer_init(Ringbuffer *ringbuffer,
         void *data, size_t element_size, size_t element_count)
 {
     ringbuffer->first_elem = (uint8_t *)data;
-    ringbuffer->last_elem = (ringbuffer->first_elem +
-            (element_size * (element_count-1)));
+    // TODO detect overflow on num_bytes: first_elem + num_bytes should be ok
+    ringbuffer->num_bytes = element_count * element_size;
     ringbuffer->elem_sz = element_size;
 
     ringbuffer_clear(ringbuffer);
@@ -20,37 +21,44 @@ uint32_t ringbuffer_get_element_size(Ringbuffer *ringbuffer)
 
 void ringbuffer_clear(Ringbuffer *ringbuffer)
 {
-    ringbuffer->read = ringbuffer->first_elem;
-    ringbuffer->write = ringbuffer->first_elem;
-    ringbuffer->read_wrap = 0;
-    ringbuffer->write_wrap = 0;
+    ringbuffer->read.raw = 0;
+    ringbuffer->write.raw = 0;
     ringbuffer->overflow = false;
+}
+
+// return the next index relative to the supplied one
+static RingbufferIndex next_index(const Ringbuffer *ringbuffer,
+        RingbufferIndex index)
+{
+    index.offset+= ringbuffer->elem_sz;
+    if(index.offset >= ringbuffer->num_bytes) {
+        index.offset = 0;
+        index.wrap^=1;
+    }
+    return index;
 }
 
 bool ringbuffer_advance(Ringbuffer *ringbuffer)
 {
-    if(!ringbuffer_is_empty(ringbuffer)) {
-        if(ringbuffer->read < ringbuffer->last_elem) {
-            ringbuffer->read+= ringbuffer->elem_sz;
-        } else {
-            ringbuffer->read = ringbuffer->first_elem;
-            ringbuffer->read_wrap^=1;
-        }
-        return true;
+    if(ringbuffer_is_empty(ringbuffer)) {
+        return false;
     }
-    return false;
+
+    // update read pointer to the next element
+    ringbuffer->read = next_index(ringbuffer, ringbuffer->read);
+
+    return true;
 }
 
 void *ringbuffer_get_writeable(Ringbuffer *ringbuffer)
 {
-    void *result = NULL;
     bool full = ringbuffer_is_full(ringbuffer);
     ringbuffer->overflow = full;
 
-    if(!full) {
-        result = ringbuffer->write;
+    if(full) {
+        return NULL;
     }
-    return result;
+    return ringbuffer->first_elem + ringbuffer->write.offset;
 }
 
 uint32_t ringbuffer_write(Ringbuffer *ringbuffer,
@@ -97,16 +105,13 @@ void ringbuffer_flush(Ringbuffer *ringbuffer, uint32_t element_count)
 
 bool ringbuffer_commit(Ringbuffer *ringbuffer)
 {
-    if(!ringbuffer_is_full(ringbuffer)) {
-        if(ringbuffer->write < ringbuffer->last_elem) {
-            ringbuffer->write+= ringbuffer->elem_sz;
-        } else {
-            ringbuffer->write = ringbuffer->first_elem;
-            ringbuffer->write_wrap^=1;
-        }
-        return true;
+    if(ringbuffer_is_full(ringbuffer)) {
+        return false;
     }
-    return false;
+    
+    // update write pointer to the next element
+    ringbuffer->write = next_index(ringbuffer, ringbuffer->write);
+    return true;
 }
 
 bool ringbuffer_is_initialized(Ringbuffer *ringbuffer)
@@ -116,36 +121,46 @@ bool ringbuffer_is_initialized(Ringbuffer *ringbuffer)
 
 void *ringbuffer_get_readable(Ringbuffer *ringbuffer)
 {
-    return ringbuffer_is_empty(ringbuffer) ? NULL : ringbuffer->read;
+    if(ringbuffer_is_empty(ringbuffer)) {
+       return NULL;
+    }
+    return ringbuffer->first_elem + ringbuffer->read.offset;
 }
 
 void *ringbuffer_get_readable_offset(Ringbuffer *ringbuffer, uint32_t offset)
 {
-    uint8_t *ptr = ringbuffer->read + (offset * ringbuffer->elem_sz);
+    if(offset >= ringbuffer_used_count(ringbuffer)) {
+        return NULL;
+    }
 
+    size_t byte_offset = (offset * ringbuffer->elem_sz)
+        + ringbuffer->read.offset;
+    
     // wrap around
-    ptr = (ptr > ringbuffer->last_elem)
-          ? (ringbuffer->first_elem
-             + ((ptr - ringbuffer->last_elem) - ringbuffer->elem_sz))
-          : ptr;
+    if(byte_offset >= ringbuffer->num_bytes) {
+        byte_offset-= ringbuffer->num_bytes;
+    }
+    
+    assert(byte_offset < ringbuffer->num_bytes);
 
-    // return NULL if offset is invalid
-    // (out of range or not enough data to read)
-    return (ptr > ringbuffer->last_elem || ptr < ringbuffer->first_elem)
-           ? NULL
-           : ((ringbuffer_used_count(ringbuffer) > offset) ? ptr : NULL);
+    return ringbuffer->first_elem + byte_offset;
 }
 
 inline bool ringbuffer_is_empty(Ringbuffer *ringbuffer)
 {
-    return (ringbuffer->read == ringbuffer->write
-            && ringbuffer->read_wrap == ringbuffer->write_wrap);
+    const RingbufferIndex read = ringbuffer->read;
+    const RingbufferIndex write = ringbuffer->write;
+
+    return (read.raw == write.raw);
 }
 
 inline bool ringbuffer_is_full(Ringbuffer *ringbuffer)
 {
-    return (ringbuffer->read == ringbuffer->write
-            && ringbuffer->read_wrap != ringbuffer->write_wrap);
+    const RingbufferIndex read = ringbuffer->read;
+    const RingbufferIndex write = ringbuffer->write;
+    
+    return ((read.offset == write.offset)
+            && (read.wrap != write.wrap));
 }
 
 inline bool ringbuffer_is_overflowed(Ringbuffer *ringbuffer)
@@ -155,28 +170,27 @@ inline bool ringbuffer_is_overflowed(Ringbuffer *ringbuffer)
 
 uint32_t ringbuffer_free_count(Ringbuffer *ringbuffer)
 {
-    uint32_t max_free = 1 + ((ringbuffer->last_elem - ringbuffer->first_elem)
-                        / ringbuffer->elem_sz);
+    const size_t max_free = ringbuffer->num_bytes / ringbuffer->elem_sz;
 
     return (max_free - ringbuffer_used_count(ringbuffer));
 }
 
 uint32_t ringbuffer_used_count(Ringbuffer *ringbuffer)
 {
-    // check for empty first to avoid race conflict:
-    // queue may become non-empty at any time if another thread/context
-    // performs a write.
+    // empty is a special case: r/w offsets are equal, but wrap bits too!
     if(ringbuffer_is_empty(ringbuffer)) {
         return 0;
     }
 
-    uint32_t maxDiff = ringbuffer->last_elem - ringbuffer->first_elem;
-    uint32_t diff = ringbuffer->write - ringbuffer->read;
-    if(diff && (diff <= maxDiff)) {
-        return (diff / ringbuffer->elem_sz);
+    const RingbufferIndex read = ringbuffer->read;
+    const RingbufferIndex write = ringbuffer->write;
+
+    size_t diff = write.offset - read.offset;
+    // difference zero or underflow: compensate for wraparound (or full)
+    if(!diff || (diff >= ringbuffer->num_bytes)) {
+        diff+= ringbuffer->num_bytes;
     }
-    // write pointer <= read pointer: compensate for wraparound
-    diff+= (maxDiff + ringbuffer->elem_sz);
+
     return (diff / ringbuffer->elem_sz);
 }
 

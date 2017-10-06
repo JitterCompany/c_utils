@@ -37,6 +37,7 @@ void test_write(void)
     ringbuffer_init(&ring, data, 5, 2);
    
     // first write should succeed 
+    TEST_ASSERT_EQUAL(2, ringbuffer_free_count(&ring));
     TEST_ASSERT_EQUAL(1, ringbuffer_write(&ring, "TEST", 1));
     TEST_ASSERT_FALSE(ringbuffer_is_full(&ring));
     TEST_ASSERT_EQUAL(1, ringbuffer_free_count(&ring));

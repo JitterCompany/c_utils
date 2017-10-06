@@ -6,39 +6,8 @@
 #include <stdbool.h>
 #include "static_assert.h"
 
-/* These values are used by ringbuffer_is_initialized() to tell if a ringbuffer
- * has been initialized.
- * NOT_INITIALIZED is chosen to be zeroes because that is the most likely
- * case for an uninitialized ringbuffer stored in a global variable.
- *
- * In case ringbuffer is used for IPC between CPU cores for example, both
- * cores may use the same ringbuffer object in shared memory.
- * One of the cores initializes the ringbuffer, while the other can check
- * if this initialization was done.
- */
-enum initialize_status {
-    INITIALIZED = 0xC0DE,
-    NOT_INITIALIZED = 0x0000
-};
-
-/*
- * Struct representing a ringbuffer 'object'.
- *
- * This contains all state associated with a ringbuffer.
- */
-typedef struct {
-    uint8_t *first_elem;                // address of the first element
-    uint8_t *last_elem;                 // address of the last element
-    uint8_t *volatile read;             // current read pointer
-    uint8_t *volatile write;            // current write pointer
-    uint32_t elem_sz;                   // element size: read/write pointers
-                                            // advance in steps of this size
-    volatile uint8_t read_wrap;         // toggles when the read ptr wraps
-    volatile uint8_t write_wrap;        // toggles when the write ptr wraps
-    volatile bool overflow;             // last write attempt failed
-    volatile uint16_t initialize_status;// is the ringbuffer is initialized?
-} Ringbuffer;
-
+// forward declaration, see end of file
+typedef struct ringbuffer Ringbuffer;
 
 /**
  * Initialize a ringbuffer object.
@@ -317,11 +286,61 @@ uint32_t ringbuffer_free_count(Ringbuffer *ringbuffer);
  */
 uint32_t ringbuffer_used_count(Ringbuffer *ringbuffer);
 
+
+/* These values are used by ringbuffer_is_initialized() to tell if a ringbuffer
+ * has been initialized.
+ * NOT_INITIALIZED is chosen to be zeroes because that is the most likely
+ * case for an uninitialized ringbuffer stored in a global variable.
+ *
+ * In case ringbuffer is used for IPC between CPU cores for example, both
+ * cores may use the same ringbuffer object in shared memory.
+ * One of the cores initializes the ringbuffer, while the other can check
+ * if this initialization was done.
+ */
+enum initialize_status {
+    INITIALIZED = 0xC0DE,
+    NOT_INITIALIZED = 0x0000
+};
+
+/**
+ * RingbufferIndex represents an offset into the ringbuffer.
+ * The wrap bit is toggled each time the offset wraps to zero.
+ */
+#define RINGBUFFER_OFFSET_BITS ((sizeof(size_t)*8)-1)
+
+typedef union {
+    struct {
+        size_t wrap: 1;                         // wrap bit: toggles on wrap
+        size_t offset: RINGBUFFER_OFFSET_BITS;  // byte offset from first_elem
+    };
+    size_t raw;
+} RingbufferIndex;
+
+STATIC_ASSERT(sizeof(RingbufferIndex) == sizeof(size_t));
+
+/*
+ * Struct representing a ringbuffer 'object'.
+ *
+ * This contains all state associated with a ringbuffer.
+ */
+struct ringbuffer {
+    uint8_t *first_elem;                // address of the first element
+    size_t num_bytes;                   // amount of elements
+    volatile RingbufferIndex read;      // current read offset + wrap
+    volatile RingbufferIndex write;     // current write offset + wrap
+    uint32_t elem_sz;                   // element size: read/write pointers
+                                            // advance in steps of this size
+    volatile bool overflow;             // last write attempt failed
+    volatile uint16_t initialize_status;// is the ringbuffer is initialized?
+};
+
+
 // make sure the struct size is consistent on all compiles
 // (example: it should be the same for both cores if used as IPC mechanism).
 #ifndef TEST
-#define RINGBUFFER_SIZE (28)
+#define RINGBUFFER_SIZE (24)
 STATIC_ASSERT(sizeof(Ringbuffer) == RINGBUFFER_SIZE);
+STATIC_ASSERT(RINGBUFFER_OFFSET_BITS == 31);
 #endif
 
 #endif
