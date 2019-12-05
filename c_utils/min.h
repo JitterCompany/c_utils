@@ -2,9 +2,9 @@
 #define MIN_H
 
 #define min(a,b) \
-    ({ __typeof__ (a) _a = (a); \
-     __typeof__ (b) _b = (b); \
-     _a < _b ? _a : _b; })
+    ({ __typeof__ (a) _min_a = (a); \
+     __typeof__ (b) _min_b = (b); \
+     _min_a < _min_b ? _min_a : _min_b; })
 
 #endif
 

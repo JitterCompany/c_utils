@@ -69,6 +69,9 @@ file(GLOB TEST_MAIN_SOURCES
 include_directories("${TEST_NORMAL_SOURCE_DIR}")
 include_directories("${TEST_NORMAL_SOURCE_DIR}/..")
 
+# Allow includes as <c_utils/*.h> in unit tests
+include_directories("${TEST_NORMAL_SOURCE_DIR}/../..")
+
 message(STATUS "globbed:${TEST_SHARED_SOURCES}")
 
 CPM_AddModule("cpm_unity"
