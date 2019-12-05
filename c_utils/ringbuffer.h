@@ -46,7 +46,7 @@ void ringbuffer_init(Ringbuffer *ringbuffer, void *data, size_t element_size
  *
  * @return              True if the ringbuffer is initialized
  */
-bool ringbuffer_is_initialized(Ringbuffer *ringbuffer);
+bool ringbuffer_is_initialized(const Ringbuffer *const ringbuffer);
 
 
 /**
@@ -60,7 +60,7 @@ bool ringbuffer_is_initialized(Ringbuffer *ringbuffer);
  * @return              Element size. Reads or writes are always in chunks of
  *                      this size (in bytes).
  */
-uint32_t ringbuffer_get_element_size(Ringbuffer *ringbuffer); // getter for element_size
+uint32_t ringbuffer_get_element_size(const Ringbuffer *const ringbuffer);
 
 
 /**
@@ -180,7 +180,7 @@ bool ringbuffer_commit(Ringbuffer *ringbuffer);
  * @return              Pointer to a readable chunk of memory of size
  *                      element_size. NULL if no data left.
  */
-void *ringbuffer_get_readable(Ringbuffer *ringbuffer);
+void *ringbuffer_get_readable(const Ringbuffer *const ringbuffer);
 
 
 /**
@@ -198,7 +198,7 @@ void *ringbuffer_get_readable(Ringbuffer *ringbuffer);
  * @return              Pointer to a readable chunk of memory of size
  *                      element_size. NULL if no data left at this offset.
  */
-void *ringbuffer_get_readable_offset(Ringbuffer *ringbuffer, uint32_t offset);
+void *ringbuffer_get_readable_offset(const Ringbuffer *const ringbuffer, uint32_t offset);
 
 
 /**
@@ -231,7 +231,7 @@ bool ringbuffer_advance(Ringbuffer *ringbuffer);
  *
  * @return              True if the ringbuffer is empty
  */
-bool ringbuffer_is_empty(Ringbuffer *ringbuffer);
+bool ringbuffer_is_empty(const Ringbuffer *const ringbuffer);
 
 
 /**
@@ -245,7 +245,7 @@ bool ringbuffer_is_empty(Ringbuffer *ringbuffer);
  *
  * @return              True if the ringbuffer is full
  */
-bool ringbuffer_is_full(Ringbuffer *ringbuffer);
+bool ringbuffer_is_full(const Ringbuffer *const ringbuffer);
 
 
 /**
@@ -262,7 +262,7 @@ bool ringbuffer_is_full(Ringbuffer *ringbuffer);
  *
  * @return              True if the ringbuffer is overflowed
  */
-bool ringbuffer_is_overflowed(Ringbuffer *ringbuffer);
+bool ringbuffer_is_overflowed(const Ringbuffer *const ringbuffer);
 
 
 /**
@@ -273,7 +273,7 @@ bool ringbuffer_is_overflowed(Ringbuffer *ringbuffer);
  * @return              Amount of elements (of element_size bytes,
  *                      @see ringbuffer_get_element_size) available for writing.
  */
-uint32_t ringbuffer_free_count(Ringbuffer *ringbuffer);
+uint32_t ringbuffer_free_count(const Ringbuffer *const ringbuffer);
 
 
 /**
@@ -284,7 +284,7 @@ uint32_t ringbuffer_free_count(Ringbuffer *ringbuffer);
  * @return              Amount of elements (of element_size bytes,
  *                      @see ringbuffer_get_element_size) available to read.
  */
-uint32_t ringbuffer_used_count(Ringbuffer *ringbuffer);
+uint32_t ringbuffer_used_count(const Ringbuffer *const ringbuffer);
 
 
 /* These values are used by ringbuffer_is_initialized() to tell if a ringbuffer

@@ -14,7 +14,7 @@ void ringbuffer_init(Ringbuffer *ringbuffer,
     ringbuffer->initialize_status = INITIALIZED;
 }
 
-uint32_t ringbuffer_get_element_size(Ringbuffer *ringbuffer)
+uint32_t ringbuffer_get_element_size(const Ringbuffer *const ringbuffer)
 {
     return ringbuffer->elem_sz;
 }
@@ -114,12 +114,12 @@ bool ringbuffer_commit(Ringbuffer *ringbuffer)
     return true;
 }
 
-bool ringbuffer_is_initialized(Ringbuffer *ringbuffer)
+bool ringbuffer_is_initialized(const Ringbuffer *const ringbuffer)
 {
     return ringbuffer->initialize_status == INITIALIZED;
 }
 
-void *ringbuffer_get_readable(Ringbuffer *ringbuffer)
+void *ringbuffer_get_readable(const Ringbuffer *const ringbuffer)
 {
     if(ringbuffer_is_empty(ringbuffer)) {
        return NULL;
@@ -127,7 +127,7 @@ void *ringbuffer_get_readable(Ringbuffer *ringbuffer)
     return ringbuffer->first_elem + ringbuffer->read.offset;
 }
 
-void *ringbuffer_get_readable_offset(Ringbuffer *ringbuffer, uint32_t offset)
+void *ringbuffer_get_readable_offset(const Ringbuffer *const ringbuffer, uint32_t offset)
 {
     if(offset >= ringbuffer_used_count(ringbuffer)) {
         return NULL;
@@ -146,7 +146,7 @@ void *ringbuffer_get_readable_offset(Ringbuffer *ringbuffer, uint32_t offset)
     return ringbuffer->first_elem + byte_offset;
 }
 
-inline bool ringbuffer_is_empty(Ringbuffer *ringbuffer)
+inline bool ringbuffer_is_empty(const Ringbuffer *const ringbuffer)
 {
     const RingbufferIndex read = ringbuffer->read;
     const RingbufferIndex write = ringbuffer->write;
@@ -154,7 +154,7 @@ inline bool ringbuffer_is_empty(Ringbuffer *ringbuffer)
     return (read.raw == write.raw);
 }
 
-inline bool ringbuffer_is_full(Ringbuffer *ringbuffer)
+inline bool ringbuffer_is_full(const Ringbuffer *const ringbuffer)
 {
     const RingbufferIndex read = ringbuffer->read;
     const RingbufferIndex write = ringbuffer->write;
@@ -163,19 +163,19 @@ inline bool ringbuffer_is_full(Ringbuffer *ringbuffer)
             && (read.wrap != write.wrap));
 }
 
-inline bool ringbuffer_is_overflowed(Ringbuffer *ringbuffer)
+inline bool ringbuffer_is_overflowed(const Ringbuffer *const ringbuffer)
 {
     return ringbuffer->overflow && ringbuffer_is_full(ringbuffer);
 }
 
-uint32_t ringbuffer_free_count(Ringbuffer *ringbuffer)
+uint32_t ringbuffer_free_count(const Ringbuffer *const ringbuffer)
 {
     const size_t max_free = ringbuffer->num_bytes / ringbuffer->elem_sz;
 
     return (max_free - ringbuffer_used_count(ringbuffer));
 }
 
-uint32_t ringbuffer_used_count(Ringbuffer *ringbuffer)
+uint32_t ringbuffer_used_count(const Ringbuffer *const ringbuffer)
 {
     // empty is a special case: r/w offsets are equal, but wrap bits too!
     if(ringbuffer_is_empty(ringbuffer)) {
