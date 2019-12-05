@@ -4,6 +4,7 @@
 
 #include "unity.h"
 #include <c_utils/array.h>
+#include <c_utils/min.h>
 
 void _test_is_array_helper(int pseudo_a[], int pseudo_b[2])
 {
@@ -30,12 +31,15 @@ void test_is_array(void)
 
 }
 
-void test_array_size(void)
+void test_array_length(void)
 {
     uint8_t bytes[4];
     int32_t ints[5];
     TEST_ASSERT_EQUAL(4, array_length(bytes));
     TEST_ASSERT_EQUAL(5, array_length(ints));
+
+    // This should compile!
+    min(0U, array_length(ints));
 
     //int32_t *ptr = ints;
     //TEST_ASSERT_EQUAL(5, array_length(ptr)); // should trigger a STATIC_ASSERT() fail
@@ -47,7 +51,7 @@ int main(void)
     UNITY_BEGIN();
 
     RUN_TEST(test_is_array);
-    RUN_TEST(test_array_size);
+    RUN_TEST(test_array_length);
 
     UNITY_END();
 

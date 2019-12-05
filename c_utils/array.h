@@ -1,5 +1,5 @@
-#ifndef COUNTOF_H
-#define COUNTOF_H
+#ifndef C_UTILS_ARRAY_H
+#define C_UTILS_ARRAY_H
 
 #include <c_utils/static_assert.h>
 
@@ -11,8 +11,10 @@
 // Calculates length of array. Compiling will fail if you pass a non-array
 // value.
 #define array_length(arr) \
-    ((sizeof(STATIC_ASSERT(IS_ARRAY(arr)))*0) + \
-     (sizeof(arr) / sizeof(*arr)))
+    ({ \
+     STATIC_ASSERT(IS_ARRAY(arr)); \
+     (sizeof(arr) / sizeof(*arr)); \
+    })
 
 #endif
 
