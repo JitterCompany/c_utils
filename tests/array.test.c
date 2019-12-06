@@ -45,6 +45,37 @@ void test_array_length(void)
     //TEST_ASSERT_EQUAL(5, array_length(ptr)); // should trigger a STATIC_ASSERT() fail
 }
 
+void test_array_max(void)
+{
+    int values[] = {1,2,3,4,-9};
+    TEST_ASSERT_EQUAL(4, array_max(values, array_length(values)));
+
+    int values2[] = {1,2,3,4,-9, 100};
+    TEST_ASSERT_EQUAL(100, array_max(values2, array_length(values2)));
+
+    float floats[] = {-1e9, -1e5, -1e12, -1e9};
+    TEST_ASSERT_EQUAL_FLOAT(-1e5, array_max(floats, array_length(floats)));
+
+    float floats2[] = {-1e9, -1e5, 1e12, -1e9};
+    float *ptr = floats2;
+    TEST_ASSERT_EQUAL_FLOAT(1e12, array_max(ptr, 4));
+}
+
+void test_array_min(void)
+{
+    int values[] = {1,2,3,4,-9};
+    TEST_ASSERT_EQUAL(-9, array_min(values, array_length(values)));
+
+    int values2[] = {1,2,3,4,-9, 100};
+    TEST_ASSERT_EQUAL(-9, array_min(values2, array_length(values2)));
+
+    float floats[] = {-1e9, -1e5, -1e12, -1e9};
+    TEST_ASSERT_EQUAL_FLOAT(-1e12, array_min(floats, array_length(floats)));
+
+    float floats2[] = {-1e9, -1e5, 1e12, -1e9};
+    float *ptr = floats2;
+    TEST_ASSERT_EQUAL_FLOAT(-1e9, array_min(ptr, 4));
+}
 
 int main(void)
 {
@@ -52,6 +83,8 @@ int main(void)
 
     RUN_TEST(test_is_array);
     RUN_TEST(test_array_length);
+    RUN_TEST(test_array_max);
+    RUN_TEST(test_array_min);
 
     UNITY_END();
 
