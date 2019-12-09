@@ -30,6 +30,28 @@ void test_init(void)
     TEST_ASSERT_EQUAL(17, ringbuffer_free_count(&ring));
 }
 
+void test_init_empty(void)
+{
+    Ringbuffer ring;
+    memset(&ring, 0xFF, sizeof(ring));
+
+    TEST_ASSERT_FALSE(ringbuffer_is_initialized(&ring));
+    ringbuffer_init(&ring, NULL, 0, 0);
+    TEST_ASSERT(ringbuffer_is_initialized(&ring));
+
+    TEST_ASSERT(ringbuffer_is_empty(&ring));
+    TEST_ASSERT_EQUAL(0, ringbuffer_used_count(&ring));
+
+    TEST_ASSERT_TRUE(ringbuffer_is_full(&ring));
+    TEST_ASSERT_FALSE(ringbuffer_is_overflowed(&ring));
+
+    TEST_ASSERT_EQUAL(0, ringbuffer_get_element_size(&ring));
+    TEST_ASSERT_EQUAL(0, ringbuffer_free_count(&ring));
+
+    TEST_ASSERT_EQUAL(0, ringbuffer_get_readable(&ring));
+    TEST_ASSERT_EQUAL(0, ringbuffer_get_writeable(&ring));
+}
+
 void test_write(void)
 {
     uint8_t data[5*2];
@@ -169,6 +191,7 @@ int main(void)
     UNITY_BEGIN();
 
     RUN_TEST(test_init);
+    RUN_TEST(test_init_empty);
     RUN_TEST(test_write);
     RUN_TEST(test_read);
     RUN_TEST(test_write_multiple_flush);

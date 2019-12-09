@@ -159,8 +159,9 @@ inline bool ringbuffer_is_full(const Ringbuffer *const ringbuffer)
     const RingbufferIndex read = ringbuffer->read;
     const RingbufferIndex write = ringbuffer->write;
     
-    return ((read.offset == write.offset)
-            && (read.wrap != write.wrap));
+    return (((read.offset == write.offset)
+            && (read.wrap != write.wrap))
+            || (!ringbuffer->elem_sz));
 }
 
 inline bool ringbuffer_is_overflowed(const Ringbuffer *const ringbuffer)
@@ -170,7 +171,11 @@ inline bool ringbuffer_is_overflowed(const Ringbuffer *const ringbuffer)
 
 uint32_t ringbuffer_free_count(const Ringbuffer *const ringbuffer)
 {
-    const size_t max_free = ringbuffer->num_bytes / ringbuffer->elem_sz;
+    const size_t elem_sz = ringbuffer->elem_sz;
+    if(!elem_sz) {
+        return 0;
+    }
+    const size_t max_free = ringbuffer->num_bytes / elem_sz;
 
     return (max_free - ringbuffer_used_count(ringbuffer));
 }
