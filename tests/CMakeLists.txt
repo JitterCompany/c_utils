@@ -48,6 +48,7 @@ set(TEST_TESTS_SOURCE_DIR    "${CMAKE_CURRENT_SOURCE_DIR}")
 # Note: these are relative to TEST_NORMAL_SOURCE_DIR.
 set(test_align_src align.c)
 set(test_f2strn_src f2strn.c)
+set(test_long_long_to_str_src long_long_to_str.c)
 set(test_str_src str.c)
 set(test_ringbuffer_src ringbuffer.c)
 
