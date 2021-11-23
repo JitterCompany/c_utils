@@ -5,12 +5,15 @@
 #include "unity.h"
 #include <stdlib.h>
 
+// Unity boilerplate
+void setUp(void){}
+void tearDown(void){}
 
 void test__hardcoded__match(void)
 {
     char string[256];
 
-    
+
     // Positive
     memset(string, 0x33, 256);
     string[255] = 0;

@@ -5,6 +5,10 @@
 #include "unity.h"
 #include "round.h"
 
+// Unity boilerplate
+void setUp(void){}
+void tearDown(void){}
+
 void test_divide_round_up_4_div_1(void)
 {
     TEST_ASSERT_EQUAL(4, divide_round_up(4,1));

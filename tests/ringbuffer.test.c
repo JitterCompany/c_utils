@@ -5,6 +5,10 @@
 #include "unity.h"
 #include "ringbuffer.h"
 
+// Unity boilerplate
+void setUp(void){}
+void tearDown(void){}
+
 void assert(bool sane)
 {
     TEST_ASSERT_MESSAGE(sane, "Assertion failed!");
@@ -57,8 +61,8 @@ void test_write(void)
     uint8_t data[5*2];
     Ringbuffer ring;
     ringbuffer_init(&ring, data, 5, 2);
-   
-    // first write should succeed 
+
+    // first write should succeed
     TEST_ASSERT_EQUAL(2, ringbuffer_free_count(&ring));
     TEST_ASSERT_EQUAL(1, ringbuffer_write(&ring, "TEST", 1));
     TEST_ASSERT_FALSE(ringbuffer_is_full(&ring));
@@ -86,7 +90,7 @@ void test_read(void)
     uint8_t data[5*2];
     Ringbuffer ring;
     ringbuffer_init(&ring, data, 5, 2);
-   
+
     TEST_ASSERT_EQUAL(1, ringbuffer_write(&ring, "TEST", 1));
     TEST_ASSERT_FALSE(ringbuffer_is_empty(&ring));
     TEST_ASSERT_EQUAL(1, ringbuffer_used_count(&ring));
@@ -97,7 +101,7 @@ void test_read(void)
     TEST_ASSERT_EQUAL_STRING("TEST", result);
     TEST_ASSERT_TRUE(ringbuffer_is_empty(&ring));
     TEST_ASSERT_EQUAL(0, ringbuffer_used_count(&ring));
-    
+
     // second read: should fail because the ringbuffer is empty
     strcpy(result, "ABCD");
     TEST_ASSERT_EQUAL(0, ringbuffer_read(&ring, result, 1));
@@ -109,8 +113,8 @@ void test_write_multiple_flush(void)
     uint8_t data[5*3];
     Ringbuffer ring;
     ringbuffer_init(&ring, data, 5, 3);
-   
-    // first two writes should succeed 
+
+    // first two writes should succeed
     TEST_ASSERT_EQUAL(2, ringbuffer_write(&ring, "TEST\0ABCD\0", 2));
     TEST_ASSERT_EQUAL(2, ringbuffer_used_count(&ring));
 
@@ -121,7 +125,7 @@ void test_write_multiple_flush(void)
 
     // flush first two items (TEST, ABCD)
     ringbuffer_flush(&ring, 2);
-    
+
     // third item should be read out last
     char result[5];
     TEST_ASSERT_EQUAL(1, ringbuffer_read(&ring, result, 1));
@@ -141,7 +145,7 @@ void test_wraparound(void)
 
     // write two elements
     TEST_ASSERT_EQUAL(2, ringbuffer_write(&ring, "TEST\0ABCD\0", 2));
-    
+
     // read_ptr at 0, write_ptr at 2, expect data at read offset 0, 1
     char *element = ringbuffer_get_readable_offset(&ring, 0);
     TEST_ASSERT_NOT_NULL(element);
@@ -162,7 +166,7 @@ void test_wraparound(void)
     element = ringbuffer_get_readable_offset(&ring, 0);
     TEST_ASSERT_NOT_NULL(element);
     TEST_ASSERT_EQUAL_STRING("EFGH", element);
-    
+
     element = ringbuffer_get_readable_offset(&ring, 1);
     TEST_ASSERT_NOT_NULL(element);
     TEST_ASSERT_EQUAL_STRING("IJKL", element);

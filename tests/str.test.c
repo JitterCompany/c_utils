@@ -8,6 +8,10 @@
 #include <bsd/string.h>
 #endif
 
+// Unity boilerplate
+void setUp(void){}
+void tearDown(void){}
+
 void test_str_toupper(void)
 {
     const char *reference = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

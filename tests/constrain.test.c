@@ -5,6 +5,10 @@
 #include "unity.h"
 #include "constrain.h"
 
+// Unity boilerplate
+void setUp(void){}
+void tearDown(void){}
+
 void test_constrain_below(void)
 {
     TEST_ASSERT_EQUAL(-8, constrain(-100,  -8, 19));

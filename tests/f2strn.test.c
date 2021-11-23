@@ -5,6 +5,11 @@
 #include "unity.h"
 #include <stdlib.h>
 
+
+// Unity boilerplate
+void setUp(void){}
+void tearDown(void){}
+
 // Set to 1 to run all possible floats trough the test.
 // Note: depending on your hardware this test may take several hours!
 #define RUN_BRUTEFORCE_TEST (0)

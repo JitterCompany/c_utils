@@ -6,6 +6,10 @@
 #include <c_utils/array.h>
 #include <c_utils/min.h>
 
+// Unity boilerplate
+void setUp(void){}
+void tearDown(void){}
+
 void _test_is_array_helper(int pseudo_a[], int pseudo_b[2])
 {
     // This is a 'real' array

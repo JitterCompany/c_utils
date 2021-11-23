@@ -5,6 +5,10 @@
 #include "unity.h"
 #include "align.h"
 
+// Unity boilerplate
+void setUp(void){}
+void tearDown(void){}
+
 void test_align_4_mod_0(void)
 {
     uint32_t value;
