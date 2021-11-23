@@ -51,6 +51,7 @@ set(test_f2strn_src f2strn.c)
 set(test_long_long_to_str_src long_long_to_str.c)
 set(test_str_src str.c)
 set(test_ringbuffer_src ringbuffer.c)
+set(test_retry_ringbuffer_src ringbuffer.c retry_ringbuffer.c)
 
 
 # all 'shared' c files: these are linked against every test.
