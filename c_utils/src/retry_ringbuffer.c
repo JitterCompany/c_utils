@@ -1,24 +1,24 @@
 #include "retry_ringbuffer.h"
 #include <assert.h>
 
-#include <stdio.h>
+// #include <stdio.h>
 
-static void debug(RetryRingbuffer *ctx)
-{
-    const RingbufferIndex read = ctx->ring->read;
-    const RingbufferIndex write = ctx->ring->write;
-    const RingbufferIndex next_write = ctx->next_write;
-    const RingbufferIndex next_read = ctx->next_read;
+// static void debug(RetryRingbuffer *ctx)
+// {
+//     const RingbufferIndex read = ctx->ring->read;
+//     const RingbufferIndex write = ctx->ring->write;
+//     const RingbufferIndex next_write = ctx->next_write;
+//     const RingbufferIndex next_read = ctx->next_read;
 
-    printf("---dbg\n");
+//     printf("---dbg\n");
 
-    printf("read: %lu, wrap: %d\n", read.offset, read.wrap);
-    printf("next_read: %lu, wrap: %d\n", next_read.offset, next_read.wrap);
+//     printf("read: %lu, wrap: %d\n", read.offset, read.wrap);
+//     printf("next_read: %lu, wrap: %d\n", next_read.offset, next_read.wrap);
 
-    printf("write: %lu, wrap: %d\n", write.offset, write.wrap);
-    printf("next_write: %lu, wrap: %d\n", next_write.offset, next_write.wrap);
-    printf("---\n");
-}
+//     printf("write: %lu, wrap: %d\n", write.offset, write.wrap);
+//     printf("next_write: %lu, wrap: %d\n", next_write.offset, next_write.wrap);
+//     printf("---\n");
+// }
 
 void retry_ringbuffer_init(RetryRingbuffer *ctx, Ringbuffer *ringbuffer)
 {
